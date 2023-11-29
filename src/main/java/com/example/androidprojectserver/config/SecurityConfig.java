@@ -1,12 +1,17 @@
 package com.example.androidprojectserver.config;
 
+import com.example.androidprojectserver.filter.CustomRequestLoggingFilter;
 import com.google.firebase.auth.FirebaseAuth;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.DefaultSecurityFilterChain;
@@ -26,17 +31,22 @@ public class SecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFil
     private FirebaseAuth firebaseAuth;
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        System.out.println("시큐리티 설정~~~");
         http
                 .authorizeRequests(authorize -> authorize
-                        .requestMatchers("/**").hasAuthority("USER") // USER 권한이 있는 사용자에게 모든 페이지 허용
-                        .anyRequest().authenticated()
+                        .requestMatchers("/**").authenticated()
                 )
                 .addFilterBefore(new FirebaseTokenFilter(userDetailsService, firebaseAuth),
                         UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(configurer -> configurer
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 );
-        System.out.println("시큐리티 끝~~~");
+    }
+
+    @Bean
+    public FilterRegistrationBean<CustomRequestLoggingFilter> loggingFilter() {
+        FilterRegistrationBean<CustomRequestLoggingFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(new CustomRequestLoggingFilter());
+        registrationBean.addUrlPatterns("/*"); // 모든 URL에 대해 필터 적용
+        return registrationBean;
     }
 }

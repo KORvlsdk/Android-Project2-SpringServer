@@ -32,8 +32,6 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        System.out.println("요청 도착~~~");
-        System.out.println(request.getHeader("Authorization"));
 
         // get the token from the request
         FirebaseToken decodedToken;
@@ -47,14 +45,6 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
         // verify IdToken
         try{
             decodedToken = firebaseAuth.verifyIdToken(token);
-            // 사용자의 UID
-            String uid = decodedToken.getUid();
-
-            // 사용자의 "admin" 권한 설정
-            Map<String, Object> claims = new HashMap<>();
-            claims.put("USER", true);
-
-            firebaseAuth.setCustomUserClaims(uid, claims);
         } catch (FirebaseAuthException e) {
             setUnauthorizedResponse(response, "INVALID_TOKEN");
             return;

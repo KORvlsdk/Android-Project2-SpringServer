@@ -19,7 +19,8 @@ public class FirebaseInitializer {
     @Bean
     public FirebaseApp  initializeFirebaseApp() throws IOException {
         System.out.println("파이어 베이스 초기화");
-        FileInputStream serviceAccount = new FileInputStream("./firebase.json");
+        FileInputStream serviceAccount = new FileInputStream("firebase.json");
+        System.out.println(serviceAccount);
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();
